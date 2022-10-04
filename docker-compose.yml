@@ -1,0 +1,66 @@
+version: "3.4"
+services:
+  web:
+    image: 'yrzr/gitlab-ce-arm64v8'
+    restart: always
+    hostname: 'gitlab.local'
+    container_name: gitlab-ce
+    privileged: true
+    depends_on:
+      - postgresql
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        postgresql['enable'] = true
+        gitlab_rails['db_username'] = "gitlab"
+        gitlab_rails['db_password'] = "gitlab"
+        gitlab_rails['db_host'] = "postgresql"
+        gitlab_rails['db_port'] = "5432"
+        gitlab_rails['db_database'] = "gitlabhq_production"
+        gitlab_rails['db_adapter'] = 'postgresql'
+        gitlab_rails['db_encoding'] = 'utf8'
+        external_url 'http://gitlab.local'
+    ports:
+      - "80:80"
+      - "8043:443"
+      - "8022:22"
+    volumes:
+      - ./gitlab-config:/etc/gitlab
+      - ./gitlab-logs:/var/log/gitlab
+      - ./gitlab-data:/var/opt/gitlab
+    networks:
+      - gitlab-network
+
+  postgresql:
+    restart: always
+    image: postgres:13.6-alpine
+    container_name: gitlab-postgres
+    environment:
+      - POSTGRES_USER=gitlab
+      - POSTGRES_PASSWORD=gitlab
+      - POSTGRES_DB=gitlabhq_production
+      - TZ=America/Bogota
+      - PGDATA=/data
+    volumes:
+      - ./gitlab-db-data:/data
+    ports:
+      - "5432:5432"
+    networks:
+      - gitlab-network
+
+  gitlab-runner:
+    image: gitlab/gitlab-runner:latest
+    container_name: gitlab-runner    
+    restart: always
+    depends_on:
+      - web
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - gitlab-runner-config:/etc/gitlab-runner
+    networks:
+      - gitlab-network
+
+networks:
+  gitlab-network:
+
+volumes:
+  gitlab-runner-config:

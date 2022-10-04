@@ -1,0 +1,7 @@
+gitlab-config/
+gitlab-data/
+gitlab-db-data/
+gitlab-logs/
+gitlab-runner/
+docker.sock/
+gitlab/
