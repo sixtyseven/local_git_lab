@@ -6,6 +6,11 @@
 2. start runner service
 3. register runner with gitlab service
 
+### if gitlab running failed
+
+`brew services restart gitlab-runner`
+https://stackoverflow.com/questions/68299715/fatal-failed-to-start-gitlab-runner-launchctl-failed-with-stderr-load-faile
+
 ### how to register runner inside docker (not working so far)?
 
 Inside runner container, execute the register command.
